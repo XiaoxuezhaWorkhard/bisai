@@ -10,14 +10,14 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import train_test_split
 
 def modelfit(train_arr,label_arr,test_arr,useTrainCV=True,cv_folds=3,early_stopping_rounds=10):
-    
+
     if useTrainCV:
         dtrain = xgb.DMatrix(train_arr,label_arr)
         label = dtrain.get_label()
    #     ratio = float(np.sum(label==0)) / np.sum(label==1)
     '''
         alg.set_params(scale_pos_weight=ratio)
-    
+
         xgb_param = alg.get_xgb_params()
 	skf = StratifiedKFold(n_splits=2,shuffle=True)
         cvresult = xgb.cv(xgb_param,dtrain,num_boost_round=alg.get_params()['n_estimators'],nfold=cv_folds,stratified=True,
@@ -110,7 +110,7 @@ def xgboost_f(traindata, tstdata, traindata1, tstdata1):
 
 
     pred = np.concatenate((arr2[:, 0].reshape((-1, 1)), pred.reshape((-1, 1))), axis=1)
- 
+
 #    print dtrain_predictions
 
 #    for n in [493508051, 1332987957, 5340009393, 6262373557]:

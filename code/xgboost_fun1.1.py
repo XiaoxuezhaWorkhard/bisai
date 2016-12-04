@@ -32,7 +32,7 @@ def modelfit(param,dtrain,dtest,arr_train,useTrainCV=True,cv_folds=3,early_stopp
 
 
     for train_index, test_index in skf.split(arr_train[train_label==0], train_label[train_label==0]):
-        
+
         dtrain_x, dtrain_y = arr_train[train_label==0][train_index], train_label[train_label==0][train_index]
 
     train_x = np.concatenate((arr_train[train_label==1], dtrain_x))
@@ -51,7 +51,7 @@ def xgboost_f(traindata,tstdata):
     arr2 = np.loadtxt(tstdata,delimiter=',')
 
     label_arr = np.array(arr1[:,-1],dtype=int)
-    
+
     #训练集和测试集
     dtrain = xgb.DMatrix(arr1[:,1:-1],label_arr)
     dtest = xgb.DMatrix(arr2[:,1:])

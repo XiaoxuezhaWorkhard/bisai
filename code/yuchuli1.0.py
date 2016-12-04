@@ -16,11 +16,11 @@ from sklearn.externals.six import StringIO
 from sklearn import tree
 from IPython.display import Image
 from sklearn import preprocessing
-df_train = pd.read_csv('./data/trainfeature_diff1_shao.csv',header=None)
-df_test = pd.read_csv('./data/testfeature_diff1_shao.csv',header=None)
+df_train = pd.read_csv('../data/train_fea.csv',header=None)
+df_test = pd.read_csv('../data/test_fea.csv',header=None)
 #train_diff = pd.read_csv('./data/trainfeature_diff_shao.csv',header=None)
 #test_diff = pd.read_csv('./data/testfeature_diff_shao.csv',header=None)
-train_label = pd.read_csv('./data/train.csv',header=None)
+#train_label = pd.read_csv('./data/train.csv',header=None)
 #train_id = pd.read_csv('/usr/local/hadoop/src/data/yichangzhi/trainid.csv',header=None)
 #test_id = pd.read_csv('/usr/local/hadoop/src/data/yichangzhi/testid.csv',header=None)
 
@@ -69,33 +69,42 @@ def paixu(arr_in,num=0):
 
 
 
-
-train_arr = np.array(df_train,dtype=float)
-test_arr = np.array(df_test,dtype=float)
+#train_arr = df_train[:,1:-1]
+#test_arr = np.array(df_test)
 
 #train_diff_arr = np.array(train_diff,dtype=float)
 #test_diff_arr = np.array(test_diff,dtype=float)
-train_label = np.array(train_label,dtype=float)
-#paixu
-train_arr = paixu(train_arr)
-test_arr = paixu(test_arr)
+col_tr = df_train.columns
+
+#train_arr = paixu(train_arr)
+#test_arr = paixu(test_arr)
 #train_diff_arr = paixu(train_diff_arr)
 #test_diff_arr = paixu(test_diff_arr)
-train_label = paixu(train_label)
+#train_label = paixu(train_label)
+
+df_train.dropna(inplace=True)
+df_test = df_test.fillna(0)
+
+df_train.reset_index(inplace=True, drop=True)
+input_train = df_train.ix[:,col_tr[1]:col_tr[-2]]
+train_id = df_train[col_tr[0]] #id
+#label2_train = train_label[:,1]
+col_ts = df_test.columns
+input_test = df_test.ix[:,col_ts[1]:]
+test_id = df_test[col_ts[0]] #id
+
+input_train = np.array(input_train)
+input_test = np.array(input_test)
+input_train[np.isinf(input_train)] = 0
+input_test[np.isinf(input_test)] = 0
+train_label = df_train[col_tr[-1]]
 
 
-input_train = np.array(train_arr[:,1:],dtype=float)
-label_train = train_arr[:,0] #id
-label2_train = train_label[:,1]
-input_test = np.array(test_arr[:,1:],dtype=float)
-label_test = test_arr[:,0] #id
 
+#train_id,test_id = gouzao_id(label_train,label_test)
 
-
-train_id,test_id = gouzao_id(label_train,label_test)
-
-input_train = np.concatenate((input_train,train_id),axis=1)
-input_test = np.concatenate((input_test,test_id),axis=1)
+#input_train = np.concatenate((input_train,train_id),axis=1)
+#input_test = np.concatenate((input_test,test_id),axis=1)
 min_max_scaler = preprocessing.MinMaxScaler()
 #删除方差较小的维度
 #sel = VarianceThreshold(threshold=0.05)
@@ -126,29 +135,29 @@ input_train = model.transform(input_train)
 #def cov_type():
 #input_test = np.array(df2.ix[:,0:-1]).copy()
 #label_test = np.array(df2.ix[:,-1]).copy()
-DIM_NUM = 30
-pca = PCA(n_components=DIM_NUM)
+#DIM_NUM = 30
+#pca = PCA(n_components=DIM_NUM)
 #input_train = pca.fit(input_train).transform(input_train)
 
 #print x_r.shape
 #lda = LinearDiscriminantAnalysis(n_components=30)
-tran_line = make_pipeline(min_max_scaler,pca)
-tran_line.fit(input_train)
+tran_line = make_pipeline(min_max_scaler)
+tran_line.fit(np.array(input_train))
 input_train=tran_line.transform(input_train)#变换训练集
 input_test=tran_line.transform(input_test)#变换测试集
-print(pca.explained_variance_ratio_)
+#print(pca.explained_variance_ratio_)
 #lda_scaler = lda.fit(input_train,label_train)
 #input_train = lda_scaler.transform(input_train)
 #print input_train.shape
 #test_x = lda_scaler.transform(input_test)
-arr_train = np.empty((len(input_train),DIM_NUM+2))
-arr_test = np.empty((len(input_test),DIM_NUM+1))
-#arr2 = np.empty((len(input_test),6+1))
-arr_train[:,1:-1] = input_train
-arr_train[:,0] = label_train
-arr_train[:,-1] = label2_train
-arr_test[:,1:] = input_test
-arr_test[:,0] = label_test
 
-np.savetxt('./data/pca_train_id_1025_2.csv',arr_train,delimiter=',')
-np.savetxt('./data/pca_test_id_1025_2.csv',arr_test,delimiter=',')
+input_train = pd.DataFrame(input_train)
+input_test = pd.DataFrame(input_test)
+#arr2 = np.empty((len(input_test),6+1))
+
+train_out = pd.concat([train_id, input_train, train_label],axis=1, ignore_index=True)
+test_out = pd.concat([test_id, input_test], axis =1,ignore_index = True)
+
+print train_out.head(),test_out.head()
+train_out.to_csv('../data/train1203_1.csv',index=False)
+test_out.to_csv('../data/test1203_1.csv',index=False)

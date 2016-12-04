@@ -1,25 +1,12 @@
 # -*- coding: utf-8 -*-
-
-
+import gc
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from ff import feature_fun, other_index
 from sklearn.preprocessing import Imputer
-
-
-#del df_train
-'''
-ax1 = fig.add_subplot(1, 1, 1)
-
-data_1 = pd.DataFrame()
-#data_x['dianliang'] = df_train.groupby('DATA_DATE')['KWH'].sum()
-data_1['yichangmean'] = df_train.groupby('DATA_DATE')['LABEL'].mean()
-data_1['toudiansum'] = df_train.groupby('DATA_DATE')['LABEL'].sum()
-
-data_1.plot(ax=ax1,secondary_y='yichangmean')
-'''
+gc.enable()
 
 def fun(arr):
     ts = pd.DataFrame(np.array(arr[['KWH', 'KWH_READING', 'KWH_READING1']]),index=arr['DATA_DATE'], columns=['KWH', 'KWH_READING', 'KWH_READING1'])
@@ -132,31 +119,31 @@ def fun(arr):
 
     return pd.DataFrame(data_feature)
 
-
+#@profile
 def function(data_in, data_out, TRAIN=False):
 
     data = pd.read_csv(data_in, parse_dates=['DATA_DATE'])
     date_min = data['DATA_DATE'].min()
     date_max = data['DATA_DATE'].max()
-    print('Strat of :' + str(date_min)
-    print('End of '+ d +':' + str(date_max)
-    print('Range of '+ d +':' + str(date_max-date_min + '\n')
+    print('Strat of :' + str(date_min))
+    print('End of :' + str(date_max))
+    print('Range of :' + str(date_max-date_min))
 
     if TRAIN:
           #删除全都为0的训练数据
           all_0 = data.groupby('CONS_NO', as_index=False)['KWH_READING1'].sum()
-          del all_0
           all_0.columns= 'CONS_NO', 'KWH_READING_SUM'
           data = pd.merge(data, all_0, on='CONS_NO')
+          del all_0
+          gc.collect()
           data = data[(data['KWH_READING_SUM']!=0)&(data['KWH_READING_SUM'].notnull())]
-    data_fea = data.groupby('CONS_NO').apply(fun)
+    data = data.groupby('CONS_NO').apply(fun)
+    data = data.unstack()
+    data.to_csv(data_out, header=False)
     del data
-    data_fea = data_fea.unstack()
-    data_fea.to_csv(data_out, header=False)
-    del data_fea
 
 
-if __name__ = '__main__':
+if __name__ == '__main__':
 
     train_in = '../data/df_train.csv'
     train_out = '../data/train_fea.csv'
