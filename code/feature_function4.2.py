@@ -23,9 +23,10 @@ def mean_all(arr):
     ts = ts.sort_index()
   #  ts = ts.resample('D','mean')
     fft_size = len(ts)
-    ts_fft = np.fft.rfft(ts) / fft_size
+    ts_fft = np.fft.fft(ts) / fft_size
+    ts_fft = ts_fft[range(fft_size/2)]
     freq = np.fft.fftfreq(len(ts), d=1/float(fft_size))
-    freq = freq[:len(ts_fft)]
+    freq = freq[range(fft_size/2)]
 
 #    freq = np.linspace(0, 10, len(ts_fft))
 #    ts_fft = np.abs(ts_fft)
@@ -53,8 +54,7 @@ time_plot1 = plt.subplot(211)
 time_plot2 = plt.subplot(212)
 
 def  feature_select(dataIn,dataOut):
-    data = pd.read_csv(dataIn, parse_dates=['DATA_DATE'], infer_datetime_format=True, keep_date_col=True, date_parser=dateparse, nrows=200000)
-    '''
+    reader = pd.read_csv(dataIn, parse_dates=['DATA_DATE'], infer_datetime_format=True, keep_date_col=True, date_parser=dateparse, iterator = True)
     loop = 1
     chunkSize = 8000000
     chunks = []
@@ -69,7 +69,7 @@ def  feature_select(dataIn,dataOut):
 
     data = pd.concat(chunks, ignore_index = True)
     del chunks
-    '''
+
  #   data[data.columns[2]] = data[data.columns[2]].convert_objects(convert_numeric=True)
      #********补全原    有序列的缺失值***********#
     data[data.columns[2]] = data[data.columns[2]].convert_objects(convert_numeric=True)
